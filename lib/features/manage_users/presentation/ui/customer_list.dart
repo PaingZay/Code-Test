@@ -4,6 +4,8 @@ import 'package:interview_test/features/manage_users/presentation/bloc/user_bloc
 import 'package:interview_test/features/manage_users/presentation/bloc/user_event.dart';
 import 'package:interview_test/features/manage_users/presentation/bloc/user_state.dart';
 import 'package:interview_test/features/manage_users/domain/entities/user.dart';
+import 'package:interview_test/features/manage_users/presentation/ui/widgets/edit_user_dialog.dart';
+import 'package:interview_test/features/manage_users/presentation/ui/widgets/keyboard_dismisser.dart';
 
 class CustomerListScreen extends StatelessWidget {
   const CustomerListScreen({super.key});
@@ -12,12 +14,14 @@ class CustomerListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<UserBloc, UserState>(
       builder: (context, state) {
-        return Scaffold(
-          appBar: AppBar(title: const Text("Customers")),
-          body: _buildBody(context, state),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () => _showCreateUserDialog(context),
-            child: const Icon(Icons.add),
+        return KeyboardDismisser(
+          child: Scaffold(
+            appBar: AppBar(title: const Text("Customers")),
+            body: _buildBody(context, state),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => _showCreateUserDialog(context),
+              child: const Icon(Icons.add),
+            ),
           ),
         );
       },
@@ -54,7 +58,7 @@ class CustomerListScreen extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit),
-                  onPressed: () => _showEditUserDialog(context, user),
+                  onPressed: () => _showEditDialog(context, user),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete),
@@ -82,8 +86,7 @@ class CustomerListScreen extends StatelessWidget {
         ),
       );
     }
-
-    return const Center(child: Text("No customers to display"));
+    return const Center(child: CircularProgressIndicator());
   }
 
   void _showCreateUserDialog(BuildContext context) {
@@ -131,48 +134,12 @@ class CustomerListScreen extends StatelessWidget {
     );
   }
 
-  void _showEditUserDialog(BuildContext context, User user) {
-    final nameController = TextEditingController(text: user.name);
-    final emailController = TextEditingController(text: user.email);
+  void _showEditDialog(BuildContext context, User user) {
+    final userBloc = context.read<UserBloc>();
 
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text("Edit Customer"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-              ),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                final updatedUser = User(
-                  id: user.id,
-                  name: nameController.text,
-                  email: emailController.text,
-                );
-                context.read<UserBloc>().add(UpdateUser(updatedUser));
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
-      },
+      builder: (context) => EditUserDialog(user: user, userBloc: userBloc),
     );
   }
 }

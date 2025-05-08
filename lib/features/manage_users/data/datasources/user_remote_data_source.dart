@@ -36,9 +36,7 @@ class UserRemoteDataSource {
         );
       }
     } catch (e) {
-      return Failure(
-        ServerException(ServerException("Failed to fetch users: $e") as String),
-      );
+      throw ServerException(e.toString());
     }
   }
 
@@ -61,7 +59,7 @@ class UserRemoteDataSource {
         );
       }
     } catch (e) {
-      return Failure(ServerException("Error creating user: $e"));
+      throw ServerException(e.toString());
     }
   }
 
@@ -84,7 +82,7 @@ class UserRemoteDataSource {
         );
       }
     } catch (e) {
-      return Failure(ServerException("Error updating user: $e"));
+      throw ServerException(e.toString());
     }
   }
 
@@ -106,7 +104,7 @@ class UserRemoteDataSource {
         );
       }
     } catch (e) {
-      return Failure(ServerException("Error deleting user: $e"));
+      throw ServerException(e.toString());
     }
   }
 }
