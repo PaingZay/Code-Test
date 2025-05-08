@@ -8,7 +8,23 @@ class UserLoading extends UserState {}
 
 class UsersLoaded extends UserState {
   final List<User> users;
-  UsersLoaded(this.users);
+  final String message;
+  UsersLoaded(this.users, this.message);
+}
+
+class UserCreated extends UserState {
+  final String message;
+  UserCreated(this.message);
+}
+
+class UserUpdated extends UserState {
+  final String message;
+  UserUpdated(this.message);
+}
+
+class UserDeleted extends UserState {
+  final String message;
+  UserDeleted(this.message);
 }
 
 class UserError extends UserState {

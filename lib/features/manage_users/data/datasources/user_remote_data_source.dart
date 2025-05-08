@@ -10,7 +10,7 @@ import 'package:interview_test/features/manage_users/domain/entities/user.dart';
 class UserRemoteDataSource {
   final ApiService apiService;
   final String baseUrl =
-      "https://crudcrud.com/api/1c3f6d174fc849539f6d09490a191fc7/users";
+      "https://crudcrud.com/api/b29972957da749ca88658377431c4b41/users";
 
   UserRemoteDataSource({required this.apiService});
 
@@ -21,7 +21,7 @@ class UserRemoteDataSource {
         method: HttpMethod.GET,
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final List<dynamic> jsonList = json.decode(response.body);
         final List<UserModel> users =
             jsonList.map((json) => UserModel.fromJson(json)).toList();
@@ -48,7 +48,7 @@ class UserRemoteDataSource {
         body: user.toJson(),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final user = UserModel.fromJson(json.decode(response.body));
         return Success(user);
       } else {
@@ -71,7 +71,7 @@ class UserRemoteDataSource {
         body: user.toJson(),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final user = UserModel.fromJson(json.decode(response.body));
         return Success(user);
       } else {
@@ -93,7 +93,7 @@ class UserRemoteDataSource {
         method: HttpMethod.DELETE,
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final user = UserModel.fromJson(json.decode(response.body));
         return Success(user);
       } else {

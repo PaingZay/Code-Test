@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:interview_test/core/uitls/toast_utils.dart';
 import 'package:interview_test/features/manage_users/presentation/bloc/user_bloc.dart';
 import 'package:interview_test/features/manage_users/presentation/bloc/user_event.dart';
 import 'package:interview_test/features/manage_users/presentation/bloc/user_state.dart';
 import 'package:interview_test/features/manage_users/domain/entities/user.dart';
+import 'package:interview_test/features/manage_users/presentation/ui/widgets/create_user_dialog.dart';
 import 'package:interview_test/features/manage_users/presentation/ui/widgets/edit_user_dialog.dart';
 import 'package:interview_test/features/manage_users/presentation/ui/widgets/keyboard_dismisser.dart';
 
@@ -12,10 +14,25 @@ class CustomerListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, UserState>(
+    return BlocConsumer<UserBloc, UserState>(
+      listener: (context, state) {
+        switch (state.runtimeType) {
+          case const (UsersLoaded):
+            ToastUtils.showSuccess((state as UsersLoaded).message);
+          case const (UserCreated):
+            ToastUtils.showSuccess((state as UserCreated).message);
+          case const (UserUpdated):
+            ToastUtils.showSuccess((state as UserUpdated).message);
+          case const (UserDeleted):
+            ToastUtils.showSuccess((state as UserDeleted).message);
+          case const (UserError):
+            ToastUtils.showError((state as UserError).message);
+        }
+      },
       builder: (context, state) {
         return KeyboardDismisser(
           child: Scaffold(
+            backgroundColor: Colors.white,
             appBar: AppBar(title: const Text("Customers")),
             body: _buildBody(context, state),
             floatingActionButton: FloatingActionButton(
@@ -36,11 +53,11 @@ class CustomerListScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("No customers found"),
+              const Text("No users found"),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => _showCreateUserDialog(context),
-                child: const Text("Add First Customer"),
+                child: const Text("Add new user"),
               ),
             ],
           ),
@@ -86,51 +103,18 @@ class CustomerListScreen extends StatelessWidget {
         ),
       );
     }
-    return const Center(child: CircularProgressIndicator());
+    if (state is UserLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return const SizedBox.shrink();
   }
 
   void _showCreateUserDialog(BuildContext context) {
-    final nameController = TextEditingController();
-    final emailController = TextEditingController();
+    final userBloc = context.read<UserBloc>();
 
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text("Add New Customer"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Name"),
-              ),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(labelText: "Email"),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                final user = User(
-                  id: DateTime.now().toString(),
-                  name: nameController.text,
-                  email: emailController.text,
-                );
-                context.read<UserBloc>().add(CreateUser(user));
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text("Save"),
-            ),
-          ],
-        );
-      },
+      builder: (context) => CreateUserDialog(userBloc: userBloc),
     );
   }
 

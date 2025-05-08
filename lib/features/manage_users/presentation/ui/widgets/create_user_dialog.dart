@@ -5,17 +5,16 @@ import 'package:interview_test/features/manage_users/presentation/bloc/user_bloc
 import 'package:interview_test/features/manage_users/presentation/bloc/user_event.dart';
 import 'package:interview_test/features/manage_users/presentation/ui/widgets/user_text_form_field.dart';
 
-class EditUserDialog extends StatefulWidget {
-  const EditUserDialog({super.key, required this.user, required this.userBloc});
+class CreateUserDialog extends StatefulWidget {
+  const CreateUserDialog({super.key, required this.userBloc});
 
-  final User user;
   final UserBloc userBloc;
 
   @override
-  State<EditUserDialog> createState() => _EditUserDialogState();
+  State<CreateUserDialog> createState() => _CreateUserDialogState();
 }
 
-class _EditUserDialogState extends State<EditUserDialog> {
+class _CreateUserDialogState extends State<CreateUserDialog> {
   late final TextEditingController nameController;
   late final TextEditingController emailController;
   late final UserBloc _userBloc;
@@ -25,8 +24,8 @@ class _EditUserDialogState extends State<EditUserDialog> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.user.name);
-    emailController = TextEditingController(text: widget.user.email);
+    nameController = TextEditingController();
+    emailController = TextEditingController();
     _userBloc = widget.userBloc;
   }
 
@@ -40,7 +39,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text("Edit Customer"),
+      title: const Text("Add New Customer"),
       content: Form(
         key: _formKey,
         child: Column(
@@ -81,18 +80,18 @@ class _EditUserDialogState extends State<EditUserDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: Navigator.of(context).pop,
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text("Cancel"),
         ),
         TextButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              final updatedUser = User(
-                id: widget.user.id,
+              final user = User(
+                id: DateTime.now().toString(),
                 name: nameController.text.trim(),
                 email: emailController.text.trim(),
               );
-              _userBloc.add(UpdateUser(updatedUser));
+              _userBloc.add(CreateUser(user));
               Navigator.of(context).pop();
             }
           },

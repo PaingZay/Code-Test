@@ -33,47 +33,65 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     final result = await getUsers.execute(NoParams());
 
     final value = switch (result) {
-      Success<List<User>>(value: final users) => UsersLoaded(users),
+      Success<List<User>>(value: final users) => UsersLoaded(
+        users,
+        "Users loaded successfully",
+      ),
       Failure<List<User>>(exception: final exception) => UserError(
-        exception as String,
+        exception.toString(),
       ),
     };
-
     emit(value);
   }
 
   Future<void> _onCreateUser(CreateUser event, Emitter<UserState> emit) async {
-    try {
-      await createUser.execute(
-        CreateUserParams(name: event.user.name, email: event.user.email),
-      );
-      add(LoadUsers());
-    } catch (e) {
-      emit(UserError(e.toString()));
-    }
+    emit(UserLoading());
+    final result = await createUser.execute(
+      CreateUserParams(name: event.user.name, email: event.user.email),
+    );
+
+    final value = switch (result) {
+      Success<void>(value: _) => UserCreated("User created successfully"),
+      Failure<void>(exception: final exception) => UserError(
+        exception.toString(),
+      ),
+    };
+
+    emit(value);
+    add(LoadUsers());
   }
 
   Future<void> _onDeleteUser(DeleteUser event, Emitter<UserState> emit) async {
-    try {
-      await deleteUser.execute(event.userId);
-      add(LoadUsers());
-    } catch (e) {
-      emit(UserError(e.toString()));
-    }
+    emit(UserLoading());
+    final result = await deleteUser.execute(event.userId);
+
+    final value = switch (result) {
+      Success<void>(value: _) => UserDeleted("User deleted successfully"),
+      Failure<void>(exception: final exception) => UserError(
+        exception.toString(),
+      ),
+    };
+
+    emit(value);
+    add(LoadUsers());
   }
 
   Future<void> _onUpdateUser(UpdateUser event, Emitter<UserState> emit) async {
-    try {
-      await updateUser.execute(
-        UpdateUserParams(
-          id: event.user.id,
-          name: event.user.name,
-          email: event.user.email,
-        ),
-      );
-      add(LoadUsers());
-    } catch (e) {
-      emit(UserError(e.toString()));
-    }
+    emit(UserLoading());
+    final result = await updateUser.execute(
+      UpdateUserParams(
+        id: event.user.id,
+        name: event.user.name,
+        email: event.user.email,
+      ),
+    );
+    final value = switch (result) {
+      Success<void>(value: _) => UserUpdated("User deleted successfully"),
+      Failure<void>(exception: final exception) => UserError(
+        exception.toString(),
+      ),
+    };
+    emit(value);
+    add(LoadUsers());
   }
 }
